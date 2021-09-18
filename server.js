@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const config = require('./app/config');
+const { BadRequestError } = require('./app/helpers/errors');
 const setUpContactRoutes = require('./app/routes/contact.routes');
 const app = express();
 
@@ -21,8 +22,20 @@ app.get('/', (req, res) => {
     res.json({ message: 'Welcome to contact book application.' });
 });
 
-
 setUpContactRoutes(app);
+
+app.use((req, res, next) => {
+    next(new BadRequestError(404, 'Resource not found'));
+});
+
+app.use((err, req, res, next) => {
+    console.log(err);
+    res.status(err.statusCode || 500).json({
+        message: err.message || 'Internal Server Error'
+    });
+});
+
+
 
 
 
